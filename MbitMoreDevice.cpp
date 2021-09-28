@@ -322,8 +322,7 @@ void MbitMoreDevice::onCommandReceived(uint8_t *data, size_t length) {
             &MbitMoreDevice::onButtonChanged,
             MESSAGE_BUS_LISTENER_QUEUE_IF_BUSY);
 #if MICROBIT_CODAL
-        uBit.io.pin[pinIndex].isTouched();
-        // uBit.io.pin[pinIndex].isTouched(TouchMode::Capacitative); // does not work?
+        uBit.io.pin[pinIndex].isTouched(codal::TouchMode::Capacitative);
 #else // NOT MICROBIT_CODAL
         uBit.io.pin[pinIndex].isTouched();
 #endif // NOT MICROBIT_CODAL
@@ -677,8 +676,8 @@ void MbitMoreDevice::listenPinEventOn(int pinIndex, int eventType) {
   if (!isGpio(pinIndex)) {
     return;
   }
-  int componentID = pinIndex + 100; // conventional scheme to convert from pin
-                                    // index to componentID in v1 and v2.
+  // conventional scheme to convert from pin index to componentID in v1 and v2.
+  int componentID = pinIndex + 100;
   uBit.messageBus.ignore(
       componentID,
       MICROBIT_PIN_EVT_RISE,
@@ -752,9 +751,8 @@ void MbitMoreDevice::onPinEvent(MicroBitEvent evt) {
   uint8_t *data = moreService->pinEventChBuffer;
 
   // pinIndex is sent as uint8_t.
-  data[0] = evt.source - 100; // conventional scheme to convert from componentID
-                              // to pin index in v1 and v2.
-
+  // conventional scheme to convert from componentID to pin index in v1 and v2.
+  data[0] = evt.source - 100;
   // event ID is sent as uint8_t.
   data[1] = (uint8_t)evt.value;
 
@@ -816,12 +814,12 @@ void MbitMoreDevice::onGestureChanged(MicroBitEvent evt) {
   uint32_t timestamp = (uint32_t)evt.timestamp;
   memcpy(&(data[2]), &timestamp, 4);
   data[MBIT_MORE_DATA_FORMAT_INDEX] = MbitMoreDataFormat::ACTION_EVENT;
-#if MICROBIT_CODAL
+#if MBIT_MORE_USE_SERIAL
   if (serialConnected) {
     serialService->notifyOnSerial(0x0111, data, MM_CH_BUFFER_SIZE_NOTIFY);
     return;
   }
-#endif // MICROBIT_CODAL
+#endif // MBIT_MORE_USE_SERIAL
   moreService->notifyActionEvent();
 }
 
@@ -938,7 +936,7 @@ void MbitMoreDevice::displayFriendlyName() {
  * 
  */
 void MbitMoreDevice::displayVersion() {
-  uBit.display.scrollAsync(ManagedString(" -M 0.2.3- "), 120);
+  uBit.display.scrollAsync(ManagedString(" -M 0.2.4- "), 120);
 }
 
 /**

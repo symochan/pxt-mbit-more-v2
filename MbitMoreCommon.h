@@ -54,6 +54,7 @@ enum MbitMoreDisplayCommand
   TEXT = 0x01,
   PIXELS_0 = 0x02,
   PIXELS_1 = 0x03,
+  SET_PIXEL = 0x05,
 };
 
 /**
@@ -135,7 +136,8 @@ enum MbitMorePinEvent
 enum MbitMoreConfig
 {
   MIC = 0x01, // microphone
-  TOUCH = 0x02
+  TOUCH = 0x02,
+  COMPASS = 0x03
 };
 
 /**

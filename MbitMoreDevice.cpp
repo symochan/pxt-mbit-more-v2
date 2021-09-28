@@ -100,9 +100,9 @@ MbitMoreDevice::MbitMoreDevice(MicroBit &_uBit) : uBit(_uBit) {
 #endif // NOT MICROBIT_CODAL
 
   // Compass must be calibrated before starting bluetooth service.
-  if (!uBit.compass.isCalibrated()) {
-    uBit.compass.calibrate();
-  }
+  // if (!uBit.compass.isCalibrated()) {
+  //   uBit.compass.calibrate();
+  // }
 
   displayVersion();
 
@@ -234,6 +234,13 @@ void MbitMoreDevice::onCommandReceived(uint8_t *data, size_t length) {
       char text[length - 1] = {0};
       memcpy(text, &(data[2]), length - 2);
       displayText(text, (data[1] * 10));
+  } else if (displayCommand == MbitMoreDisplayCommand::SET_PIXEL) {
+      //按坐标点亮led <symo@88.com>
+      int ledX = (int)data[1];
+      int ledY = (int)data[2];
+      int LedLevel = (int)data[3];
+      LedLevel = min(255 , LedLevel * 255 / 10 );
+      uBit.display.image.setPixelValue(ledX,ledY,LedLevel);
     } else if (displayCommand == MbitMoreDisplayCommand::PIXELS_0) {
       setPixelsShadowLine(0, &data[1]);
       setPixelsShadowLine(1, &data[6]);
@@ -309,6 +316,10 @@ void MbitMoreDevice::onCommandReceived(uint8_t *data, size_t length) {
 #if MICROBIT_CODAL
       micInUse = ((data[1] == 1) ? true : false);
 #endif // MICROBIT_CODAL
+    } else if (config == MbitMoreConfig::COMPASS ) {
+      if (!uBit.compass.isCalibrated()) {
+        uBit.compass.calibrate();
+      }
     } else if (config == MbitMoreConfig::TOUCH) {
       int pinIndex = data[1];
       if (pinIndex > 2)
